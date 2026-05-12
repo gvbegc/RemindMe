@@ -52,6 +52,23 @@ export async function craftReminderMessage(reminderText: string, remindAt: Date)
   return block && 'text' in block ? block.text.trim() : `Reminder: ${reminderText}`;
 }
 
+export async function chatReply(userMessage: string): Promise<string> {
+  const sys = `You are RemindMe, a friendly SMS reminder bot. The user texted you something that isn't a reminder request.
+Reply naturally and conversationally in 1-2 short sentences. Be warm and human, not robotic.
+If it makes sense, gently nudge them toward what you do (remind them about things at specific times) — but don't force it on every reply.
+No emojis. No quotes. Under 160 characters. Just the reply text.`;
+  const res = await anthropic.messages.create({
+    model: MODEL,
+    max_tokens: 150,
+    system: sys,
+    messages: [{ role: 'user', content: userMessage }],
+  });
+  const block = res.content.find((b) => b.type === 'text');
+  return block && 'text' in block
+    ? block.text.trim()
+    : `Hi! Text me something you want to be reminded of and I'll ping you when it's time.`;
+}
+
 function humanizeMinutes(mins: number) {
   if (mins < 60) return `${mins} minute${mins === 1 ? '' : 's'}`;
   const h = Math.round(mins / 60);

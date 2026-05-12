@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import crypto from 'crypto';
 import { ensureSchema, insertReminder } from '@/lib/db';
-import { parseReminder } from '@/lib/ai';
+import { parseReminder, chatReply } from '@/lib/ai';
 import { sendSms } from '@/lib/linq';
 
 export const runtime = 'nodejs';
@@ -62,10 +62,8 @@ export async function POST(req: NextRequest) {
   const parsed = await parseReminder(userText, new Date().toISOString(), tz);
 
   if (!parsed.ok) {
-    await sendSms(
-      fromHandle,
-      `Hi! This is RemindMe. Text me anything you want to be reminded of — like "remind me to call mom in 2 hours" or "remind me about my dentist appointment tomorrow at 3pm".`,
-    );
+    const reply = await chatReply(userText);
+    await sendSms(fromHandle, reply);
     return NextResponse.json({ ok: true });
   }
 
