@@ -37,7 +37,8 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ ok: true });
   }
 
-  const payload = JSON.parse(raw);
+  const envelope = JSON.parse(raw);
+  const payload = envelope.data ?? envelope;
   const direction: string | undefined = payload.direction;
   if (direction && direction !== 'inbound') {
     console.log('[webhook] skipping outbound');
