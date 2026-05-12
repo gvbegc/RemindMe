@@ -30,16 +30,30 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'invalid signature' }, { status: 401 });
   }
 
-  if (event !== 'message.received') return NextResponse.json({ ok: true });
+  console.log('[webhook] event=', event, 'raw=', raw);
+
+  if (event !== 'message.received') {
+    console.log('[webhook] skipping non-message.received');
+    return NextResponse.json({ ok: true });
+  }
 
   const payload = JSON.parse(raw);
   const direction: string | undefined = payload.direction;
-  if (direction && direction !== 'inbound') return NextResponse.json({ ok: true });
+  if (direction && direction !== 'inbound') {
+    console.log('[webhook] skipping outbound');
+    return NextResponse.json({ ok: true });
+  }
 
-  const fromHandle: string | undefined = payload.sender_handle?.handle;
-  const textPart = (payload.parts ?? []).find((p: { type: string }) => p.type === 'text');
+  const fromHandle: string | undefined =
+    payload.sender_handle?.handle ?? payload.message?.sender_handle?.handle ?? payload.from;
+  const partsArr = payload.parts ?? payload.message?.parts ?? [];
+  const textPart = partsArr.find((p: { type: string }) => p.type === 'text');
   const userText: string | undefined = textPart?.value;
-  if (!fromHandle || !userText) return NextResponse.json({ ok: true });
+  console.log('[webhook] fromHandle=', fromHandle, 'userText=', userText);
+  if (!fromHandle || !userText) {
+    console.log('[webhook] missing fromHandle or userText, returning');
+    return NextResponse.json({ ok: true });
+  }
 
   await ensureSchema();
 
