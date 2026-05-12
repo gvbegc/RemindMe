@@ -62,7 +62,10 @@ export async function POST(req: NextRequest) {
   const parsed = await parseReminder(userText, new Date().toISOString(), tz);
 
   if (!parsed.ok) {
-    await sendSms(fromHandle, parsed.reason);
+    await sendSms(
+      fromHandle,
+      `Hi! This is RemindMe. Text me anything you want to be reminded of — like "remind me to call mom in 2 hours" or "remind me about my dentist appointment tomorrow at 3pm".`,
+    );
     return NextResponse.json({ ok: true });
   }
 
