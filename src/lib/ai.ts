@@ -38,7 +38,7 @@ If no clear time is given, return ok:false with a brief reason.`;
 
 export async function craftReminderMessage(reminderText: string, remindAt: Date): Promise<string> {
   const minsUntil = Math.round((remindAt.getTime() - Date.now()) / 60000);
-  const sys = `You write a single short, friendly SMS reminder. No greeting, no emoji, no quotes. Under 140 chars.`;
+  const sys = `You write a single short, friendly SMS reminder. No greeting, no emoji, no quotes, no em dashes or en dashes. Under 140 chars.`;
   const user = `Remind the user about: "${reminderText}". It is happening ${
     minsUntil <= 0 ? 'now' : `in about ${humanizeMinutes(minsUntil)}`
   }.`;
@@ -55,8 +55,8 @@ export async function craftReminderMessage(reminderText: string, remindAt: Date)
 export async function chatReply(userMessage: string): Promise<string> {
   const sys = `You are RemindMe, a friendly SMS reminder bot. The user texted you something that isn't a reminder request.
 Reply naturally and conversationally in 1-2 short sentences. Be warm and human, not robotic.
-If it makes sense, gently nudge them toward what you do (remind them about things at specific times) — but don't force it on every reply.
-No emojis. No quotes. Under 160 characters. Just the reply text.`;
+If it makes sense, gently nudge them toward what you do (remind them about things at specific times), but don't force it on every reply.
+No emojis. No quotes. No em dashes or en dashes. Under 160 characters. Just the reply text.`;
   const res = await anthropic.messages.create({
     model: MODEL,
     max_tokens: 150,
